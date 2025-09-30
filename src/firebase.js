@@ -9,7 +9,6 @@ const firebaseConfig = {
   storageBucket: "randomfilm-3e0a8.firebasestorage.app",
   messagingSenderId: "1002994670035",
   appId: "1:1002994670035:web:d2d750a58f386b1f1eb726"
-  // measurementId не нужен для Firestore
 };
 
 const app = initializeApp(firebaseConfig);
