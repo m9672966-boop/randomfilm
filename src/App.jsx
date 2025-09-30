@@ -9,15 +9,14 @@ const App = () => {
   const [currentMovie, setCurrentMovie] = useState(null);
   const [showAnimation, setShowAnimation] = useState(false);
   const [movies, setMovies] = useState([]);
-  const [view, setView] = useState('main');
+  const [view, setView] = useState('main'); // 'main' или 'add' или 'movie'
 
   useEffect(() => {
     const loadMovies = async () => {
       const stored = await getMovies();
       setMovies(stored);
-      if (stored.length > 0) {
-        setCurrentMovie(await getRandomMovie());
-      }
+      // ❌ Не показываем фильм при загрузке!
+      // Если хочешь, чтобы фильм появлялся только после нажатия "Сгенерировать" — оставь пустым
     };
     loadMovies();
   }, []);
@@ -34,6 +33,7 @@ const App = () => {
     const movie = await getRandomMovie();
     setCurrentMovie(movie);
     setShowAnimation(false);
+    setView('movie'); // Переключаемся на отдельную страницу фильма
   };
 
   const markAsWatched = async () => {
@@ -43,7 +43,7 @@ const App = () => {
       m.id === currentMovie.id ? { ...m, watched: true } : m
     );
     setMovies(updatedMovies);
-    setCurrentMovie(await getRandomMovie());
+    setView('main'); // Возвращаемся на главную
   };
 
   const addMovie = async (movieData) => {
@@ -174,31 +174,22 @@ const App = () => {
     );
   }
 
-  // === ГЛАВНАЯ СТРАНИЦА ===
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
-          <div className="flex gap-4">
+  // === СТРАНИЦА: ФИЛЬМ (отдельная страница) ===
+  if (view === 'movie' && currentMovie) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
+        <div className="max-w-2xl mx-auto">
+          <header className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
             <button
-              onClick={() => setView('add')}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full transition font-medium"
+              onClick={() => setView('main')}
+              className="text-sm text-gray-400 hover:text-white"
             >
-              Добавить фильм
+              ← Назад
             </button>
-            <button
-              onClick={() => setIsLoggedIn(false)}
-              className="text-sm text-gray-400 hover:text-white transition"
-            >
-              Выйти
-            </button>
-          </div>
-        </header>
+          </header>
 
-        {/* Основная карточка — ЦЕНТРИРОВАНА */}
-        {currentMovie ? (
-          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
+          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 text-center">
             <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
             {currentMovie.cover ? (
               <img
@@ -209,11 +200,10 @@ const App = () => {
                   e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
                 }}
               />
-) : (
-  <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
-    🎞️ Без обложки
-  </div>
-)}
+            ) : (
+              <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
+                🎞️ Без обложки
+              </div>
             )}
             <p className="text-gray-300 mb-2">
               {currentMovie.year && <span>Год: {currentMovie.year} • </span>}
@@ -249,11 +239,48 @@ const App = () => {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-gray-400">Нет фильмов в списке!</p>
+        </div>
+      </div>
+    );
+  }
+
+  // === ГЛАВНАЯ СТРАНИЦА ===
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setView('add')}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full transition font-medium"
+            >
+              Добавить фильм
+            </button>
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="text-sm text-gray-400 hover:text-white transition"
+            >
+              Выйти
+            </button>
           </div>
-        )}
+        </header>
+
+        {/* Центральные кнопки */}
+        <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
+          <button
+            onClick={generateMovie}
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-full text-xl font-bold transition"
+          >
+            🎬 Сгенерировать случайный фильм
+          </button>
+          <button
+            onClick={() => setView('add')}
+            className="px-8 py-4 bg-green-600 hover:bg-green-700 rounded-full text-xl font-bold transition"
+          >
+            ➕ Добавить свой фильм
+          </button>
+        </div>
 
         {/* Бегущая строка — бесконечный цикл */}
         <div className="mb-10">
