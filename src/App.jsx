@@ -18,14 +18,7 @@ const App = () => {
       setCurrentMovie(getRandomMovie());
     }
   }, []);
-  const handleDelete = (id) => {
-  deleteMovie(id);
-  const updated = movies.filter(m => m.id !== id);
-  setMovies(updated);
-  if (currentMovie && currentMovie.id === id) {
-    setCurrentMovie(getRandomMovie());
-  }
-};
+
   const handleLogin = () => {
     setIsLoggedIn(true);
   };
@@ -60,9 +53,10 @@ const App = () => {
     setMovies(updated);
     saveMovies(updated);
     if (!currentMovie) setCurrentMovie(newMovie);
-    setIsAddModalOpen(false); // Закрываем форму после добавления
+    setIsAddModalOpen(false);
   };
 
+  // ✅ Только ОДНО объявление handleDelete
   const handleDelete = (id) => {
     deleteMovie(id);
     const updated = movies.filter(m => m.id !== id);
@@ -76,14 +70,13 @@ const App = () => {
 
   if (showAnimation) return <ConfettiAnimation onComplete={onAnimationComplete} />;
 
-  // Дублируем для бесконечной ленты
-  const duplicatedMovies = [...movies, ...movies];
+  // ❌ УБРАНО дублирование: const duplicatedMovies = [...movies, ...movies];
+  // Используем просто movies
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
       <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
           <div className="flex gap-4">
@@ -102,7 +95,6 @@ const App = () => {
           </div>
         </header>
 
-        {/* Main Card */}
         {currentMovie ? (
           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
@@ -165,12 +157,12 @@ const App = () => {
           </div>
         )}
 
-        {/* Бегущая строка — одна лента */}
+        {/* ✅ Одна бегущая строка */}
         <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
           <div className="overflow-hidden h-[340px]">
             <div className="flex space-x-6 animate-marquee">
-              {duplicatedMovies.map((movie) => (
+              {movies.map((movie) => (
                 <MovieItem key={movie.id} movie={movie} onDelete={handleDelete} />
               ))}
             </div>
@@ -179,22 +171,25 @@ const App = () => {
 
       </div>
 
-      {/* Modal for Add Movie */}
+      {/* Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
           <div className="bg-gray-800 rounded-2xl shadow-xl p-8 max-w-2xl w-full mx-4">
             <h2 className="text-2xl font-bold mb-4">Добавить фильм</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              addMovie({
-                title: e.target.title.value,
-                cover: e.target.cover.value,
-                genre: e.target.genre.value,
-                year: e.target.year.value,
-                reason: e.target.reason.value,
-                link: e.target.link.value,
-              });
-            }} className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                addMovie({
+                  title: e.target.title.value,
+                  cover: e.target.cover.value,
+                  genre: e.target.genre.value,
+                  year: e.target.year.value,
+                  reason: e.target.reason.value,
+                  link: e.target.link.value,
+                });
+              }}
+              className="space-y-4"
+            >
               <input
                 name="title"
                 placeholder="Название *"
@@ -250,12 +245,14 @@ const App = () => {
   );
 };
 
-// Карточка фильма в ленте
+// ✅ Встроенный компонент MovieItem (не отдельный файл!)
 const MovieItem = ({ movie, onDelete }) => {
   return (
-    <div className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md relative group ${
-      movie.watched ? 'opacity-60' : ''
-    }`}>
+    <div
+      className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md relative group ${
+        movie.watched ? 'opacity-60' : ''
+      }`}
+    >
       {movie.cover ? (
         <img
           src={movie.cover}
