@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Бесконечная бегущая строка — одна лента */
+/* Бесконечная бегущая строка */
 @keyframes marquee {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); } /* -50% потому что дублировали массив */
+  100% { transform: translateX(-50%); }
 }
 
 .animate-marquee {
@@ -14,5 +14,4 @@
   animation: marquee 40s linear infinite;
 }
 
-/* УБИРАЕМ весь медиа-запрос для мобильных - он мешает */
-/* Оставляем только анимацию бегущей строки */
+/* УДАЛЕНО ВСЕ, что связано с мобильными устройствами */
