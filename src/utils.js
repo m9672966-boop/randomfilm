@@ -22,7 +22,6 @@ export const getRandomMovie = async () => {
   const available = movies.filter(m => !m.watched && !usedMovieIds.has(m.id));
 
   if (available.length === 0) {
-    // Сбросить историю использованных фильмов
     usedMovieIds.clear();
     const allAvailable = movies.filter(m => !m.watched);
     if (allAvailable.length === 0) return null;
@@ -60,5 +59,5 @@ export const markAsWatched = async (id) => {
  */
 export const deleteMovie = async (id) => {
   await deleteDoc(doc(db, "movies", id));
-  usedMovieIds.delete(id); // Удаляем из локального кэша сессии
+  usedMovieIds.delete(id);
 };
