@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import ConfettiAnimation from './components/ConfettiAnimation';
-import { getMovies, getRandomMovie, deleteMovie } from './utils';
+import { getMovies, getRandomMovie, deleteMovie, addMovie as addMovieToDb, markAsWatched as markAsWatchedInDb } from './utils';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,11 +12,14 @@ const App = () => {
   const [view, setView] = useState('main'); // 'main' или 'add'
 
   useEffect(() => {
-    const stored = getMovies();
-    setMovies(stored);
-    if (stored.length > 0) {
-      setCurrentMovie(getRandomMovie());
-    }
+    const loadMovies = async () => {
+      const stored = await getMovies();
+      setMovies(stored);
+      if (stored.length > 0) {
+        setCurrentMovie(await getRandomMovie());
+      }
+    };
+    loadMovies();
   }, []);
 
   const handleLogin = () => {
@@ -27,41 +30,36 @@ const App = () => {
     setShowAnimation(true);
   };
 
-  const onAnimationComplete = () => {
-    const movie = getRandomMovie();
+  const onAnimationComplete = async () => {
+    const movie = await getRandomMovie();
     setCurrentMovie(movie);
     setShowAnimation(false);
   };
 
-  const markAsWatched = () => {
+  const markAsWatched = async () => {
     if (!currentMovie) return;
+    await markAsWatchedInDb(currentMovie.id);
     const updatedMovies = movies.map(m =>
       m.id === currentMovie.id ? { ...m, watched: true } : m
     );
     setMovies(updatedMovies);
-    saveMovies(updatedMovies);
-    setCurrentMovie(getRandomMovie());
+    setCurrentMovie(await getRandomMovie());
   };
 
-  const addMovie = (movieData) => {
-    const newMovie = {
-      id: Date.now(),
-      ...movieData,
-      watched: false,
-    };
+  const addMovie = async (movieData) => {
+    const newMovie = await addMovieToDb(movieData);
     const updated = [...movies, newMovie];
     setMovies(updated);
-    saveMovies(updated);
     if (!currentMovie) setCurrentMovie(newMovie);
     setView('main');
   };
 
-  const handleDelete = (id) => {
-    deleteMovie(id);
+  const handleDelete = async (id) => {
+    await deleteMovie(id);
     const updated = movies.filter(m => m.id !== id);
     setMovies(updated);
     if (currentMovie && currentMovie.id === id) {
-      setCurrentMovie(getRandomMovie());
+      setCurrentMovie(await getRandomMovie());
     }
   };
 
