@@ -7,8 +7,6 @@ const Login = ({ onLogin }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Пароль из .env — но на клиенте он будет в коде!
-    // Для безопасности в продакшене нужен бэкенд.
     if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
       onLogin();
     } else {
