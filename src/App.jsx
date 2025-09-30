@@ -9,7 +9,7 @@ const App = () => {
   const [currentMovie, setCurrentMovie] = useState(null);
   const [showAnimation, setShowAnimation] = useState(false);
   const [movies, setMovies] = useState([]);
-  const [view, setView] = useState('main'); // 'main' или 'add'
+  const [view, setView] = useState('main');
 
   useEffect(() => {
     const loadMovies = async () => {
@@ -254,13 +254,14 @@ const App = () => {
           </div>
         )}
 
-        {/* Бегущая строка — одна лента */}
+        {/* Бегущая строка — бесконечный цикл */}
         <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
           <div className="overflow-hidden h-[340px]">
             <div className="flex space-x-6 animate-marquee">
-              {movies.map((movie) => (
-                <MovieItem key={movie.id} movie={movie} onDelete={handleDelete} />
+              {/* Дублируем фильмы для бесконечности */}
+              {[...movies, ...movies].map((movie, index) => (
+                <MovieItem key={`${movie.id}-${index}`} movie={movie} onDelete={handleDelete} />
               ))}
             </div>
           </div>
