@@ -18,7 +18,14 @@ const App = () => {
       setCurrentMovie(getRandomMovie());
     }
   }, []);
-
+  const handleDelete = (id) => {
+  deleteMovie(id);
+  const updated = movies.filter(m => m.id !== id);
+  setMovies(updated);
+  if (currentMovie && currentMovie.id === id) {
+    setCurrentMovie(getRandomMovie());
+  }
+};
   const handleLogin = () => {
     setIsLoggedIn(true);
   };
