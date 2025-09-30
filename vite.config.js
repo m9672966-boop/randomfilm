@@ -1,4 +1,3 @@
-// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -8,6 +7,9 @@ export default defineConfig({
     outDir: 'dist',
   },
   base: '/',
+  css: {
+    postcss: './postcss.config.js', // Добавляем эту строку
+  },
   preview: {
     host: '0.0.0.0',
     port: parseInt(process.env.PORT, 10) || 4173,
