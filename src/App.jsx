@@ -9,7 +9,7 @@ const App = () => {
   const [currentMovie, setCurrentMovie] = useState(null);
   const [showAnimation, setShowAnimation] = useState(false);
   const [movies, setMovies] = useState([]);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [view, setView] = useState('main'); // 'main' или 'add'
 
   useEffect(() => {
     const stored = getMovies();
@@ -53,10 +53,9 @@ const App = () => {
     setMovies(updated);
     saveMovies(updated);
     if (!currentMovie) setCurrentMovie(newMovie);
-    setIsAddModalOpen(false);
+    setView('main');
   };
 
-  // ✅ Только ОДНО объявление handleDelete
   const handleDelete = (id) => {
     deleteMovie(id);
     const updated = movies.filter(m => m.id !== id);
@@ -70,18 +69,122 @@ const App = () => {
 
   if (showAnimation) return <ConfettiAnimation onComplete={onAnimationComplete} />;
 
-  // ❌ УБРАНО дублирование: const duplicatedMovies = [...movies, ...movies];
-  // Используем просто movies
+  // === СТРАНИЦА: ДОБАВЛЕНИЕ ФИЛЬМА ===
+  if (view === 'add') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
+        <div className="max-w-2xl mx-auto">
+          <header className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-bold">➕ Добавить фильм</h1>
+            <button
+              onClick={() => setView('main')}
+              className="text-sm text-gray-400 hover:text-white"
+            >
+              ← Назад
+            </button>
+          </header>
 
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addMovie({
+                title: e.target.title.value,
+                cover: e.target.cover.value,
+                genre: e.target.genre.value,
+                year: e.target.year.value,
+                reason: e.target.reason.value,
+                link: e.target.link.value,
+              });
+            }}
+            className="space-y-6 bg-gray-800 p-6 rounded-2xl shadow-lg"
+          >
+            <div>
+              <label className="block text-sm font-medium mb-2">Название *</label>
+              <input
+                name="title"
+                placeholder="Название фильма"
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Год</label>
+              <input
+                name="year"
+                type="number"
+                placeholder="2024"
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Жанр</label>
+              <input
+                name="genre"
+                placeholder="Драма, Комедия..."
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">URL обложки</label>
+              <input
+                name="cover"
+                placeholder="https://example.com/poster.jpg"
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Ссылка на фильм</label>
+              <input
+                name="link"
+                placeholder="https://kinopoisk.ru/film/123"
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Почему рекомендуете?</label>
+              <textarea
+                name="reason"
+                placeholder="Опишите..."
+                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="4"
+              />
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => setView('main')}
+                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded transition"
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded transition font-medium"
+              >
+                Добавить
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // === ГЛАВНАЯ СТРАНИЦА ===
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
       <div className="max-w-7xl mx-auto">
-
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
           <div className="flex gap-4">
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => setView('add')}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full transition font-medium"
             >
               Добавить фильм
@@ -95,10 +198,10 @@ const App = () => {
           </div>
         </header>
 
+        {/* Основная карточка */}
         {currentMovie ? (
           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
-
             {currentMovie.cover ? (
               <img
                 src={currentMovie.cover}
@@ -113,16 +216,13 @@ const App = () => {
                 🎞️ Без обложки
               </div>
             )}
-
             <p className="text-gray-300 mb-2">
               {currentMovie.year && <span>Год: {currentMovie.year} • </span>}
               {currentMovie.genre && <span>Жанр: {currentMovie.genre}</span>}
             </p>
-
             {currentMovie.reason && (
               <p className="italic text-gray-400 mt-2">«{currentMovie.reason}»</p>
             )}
-
             {currentMovie.link && (
               <p className="mt-2">
                 <a
@@ -135,7 +235,6 @@ const App = () => {
                 </a>
               </p>
             )}
-
             <div className="mt-6 flex justify-center gap-4">
               <button
                 onClick={generateMovie}
@@ -157,7 +256,7 @@ const App = () => {
           </div>
         )}
 
-        {/* ✅ Одна бегущая строка */}
+        {/* Бегущая строка — одна лента */}
         <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
           <div className="overflow-hidden h-[340px]">
@@ -168,84 +267,12 @@ const App = () => {
             </div>
           </div>
         </div>
-
       </div>
-
-      {/* Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="bg-gray-800 rounded-2xl shadow-xl p-8 max-w-2xl w-full mx-4">
-            <h2 className="text-2xl font-bold mb-4">Добавить фильм</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                addMovie({
-                  title: e.target.title.value,
-                  cover: e.target.cover.value,
-                  genre: e.target.genre.value,
-                  year: e.target.year.value,
-                  reason: e.target.reason.value,
-                  link: e.target.link.value,
-                });
-              }}
-              className="space-y-4"
-            >
-              <input
-                name="title"
-                placeholder="Название *"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <input
-                name="cover"
-                placeholder="URL обложки (опционально)"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="genre"
-                placeholder="Жанр"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="year"
-                placeholder="Год"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="link"
-                placeholder="Ссылка на фильм (опционально)"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <textarea
-                name="reason"
-                placeholder="Почему рекомендуете?"
-                className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows="4"
-              />
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded transition"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition"
-                >
-                  Добавить
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-// ✅ Встроенный компонент MovieItem (не отдельный файл!)
+// Встроенный компонент карточки фильма
 const MovieItem = ({ movie, onDelete }) => {
   return (
     <div
