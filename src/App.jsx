@@ -196,7 +196,7 @@ const App = () => {
           </div>
         </header>
 
-        {/* Основная карточка */}
+        {/* Основная карточка — ЦЕНТРИРОВАНА */}
         {currentMovie ? (
           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
@@ -209,7 +209,7 @@ const App = () => {
                   e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
                 }}
               />
-            ) : (
+            ) else (
               <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
                 🎞️ Без обложки
               </div>
@@ -259,7 +259,6 @@ const App = () => {
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
           <div className="overflow-hidden h-[340px]">
             <div className="flex space-x-6 animate-marquee">
-              {/* Дублируем фильмы для бесконечности */}
               {[...movies, ...movies].map((movie, index) => (
                 <MovieItem key={`${movie.id}-${index}`} movie={movie} onDelete={handleDelete} />
               ))}
