@@ -1,18 +1,17 @@
 // src/utils.js
+import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
+import { db } from "./firebase";
+
 let usedMovieIds = new Set();
 
-export const getMovies = () => {
-  const data = localStorage.getItem('movies');
-  return data ? JSON.parse(data) : [];
+export const getMovies = async () => {
+  const querySnapshot = await getDocs(collection(db, "movies"));
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const saveMovies = (movies) => {
-  localStorage.setItem('movies', JSON.stringify(movies));
-};
-
-export const getRandomMovie = () => {
-  const movies = getMovies().filter(m => !m.watched);
-  const available = movies.filter(m => !usedMovieIds.has(m.id));
+export const getRandomMovie = async () => {
+  const movies = await getMovies();
+  const available = movies.filter(m => !m.watched && !usedMovieIds.has(m.id));
 
   if (available.length === 0) {
     usedMovieIds.clear();
@@ -28,9 +27,20 @@ export const getRandomMovie = () => {
   return randomMovie;
 };
 
-export const deleteMovie = (id) => {
-  const movies = getMovies();
-  const updated = movies.filter(m => m.id !== id);
-  saveMovies(updated);
+export const addMovie = async (movieData) => {
+  const docRef = await addDoc(collection(db, "movies"), {
+    ...movieData,
+    watched: false,
+    createdAt: new Date()
+  });
+  return { id: docRef.id, ...movieData, watched: false };
+};
+
+export const markAsWatched = async (id) => {
+  await updateDoc(doc(db, "movies", id), { watched: true });
+};
+
+export const deleteMovie = async (id) => {
+  await deleteDoc(doc(db, "movies", id));
   usedMovieIds.delete(id);
 };
