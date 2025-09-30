@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import ConfettiAnimation from './components/ConfettiAnimation';
-import { getMovies, saveMovies, getRandomMovie, deleteMovie } from './utils';
+import { getMovies, getRandomMovie, deleteMovie } from './utils';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
