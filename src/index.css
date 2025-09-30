@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Бегущая строка — плавное движение вправо */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+  /* Повторяем элементы, чтобы создать бесконечную ленту */
+  &::after {
+    content: '';
+    display: block;
+    width: 100%;
+    margin-left: 1rem;
+  }
+}
+
+/* Для мобильных устройств — замедляем анимацию */
+@media (max-width: 768px) {
+  .animate-marquee {
+    animation-duration: 60s;
+  }
+}
