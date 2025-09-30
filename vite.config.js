@@ -7,10 +7,6 @@ export default defineConfig({
     outDir: 'dist',
   },
   base: '/',
-  // УДАЛИТЕ эту строку - Vite автоматически найдет postcss.config.cjs
-  // css: {
-  //   postcss: './postcss.config.js',
-  // },
   preview: {
     host: '0.0.0.0',
     port: parseInt(process.env.PORT, 10) || 4173,
