@@ -16,7 +16,7 @@ export const getRandomMovie = () => {
 
   if (available.length === 0) {
     usedMovieIds.clear();
-    const allAvailable = movies;
+    const allAvailable = movies.filter(m => !m.watched);
     if (allAvailable.length === 0) return null;
     const randomMovie = allAvailable[Math.floor(Math.random() * allAvailable.length)];
     usedMovieIds.add(randomMovie.id);
