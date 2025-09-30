@@ -28,7 +28,7 @@ const ConfettiAnimation = ({ onComplete }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
       <ReactConfetti width={window.innerWidth} height={window.innerHeight} />
-      <div className="text-white text-4xl font-bold animate-pulse">
+      <div className="text-white text-6xl font-bold animate-pulse text-center">
         {words.slice(0, textIndex).join(' ')}
       </div>
     </div>
