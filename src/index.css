@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Бесконечная бегущая строка — одна лента */
 @keyframes marquee {
   0% { transform: translateX(0); }
@@ -10,13 +14,13 @@
   animation: marquee 40s linear infinite;
 }
 
-/* Только для ПК */
-@media (max-width: 1024px) {
+/* Только для мобильных устройств */
+@media (max-width: 768px) {
   body::before {
     content: "Доступно только на компьютере";
     display: block;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: white;
     padding-top: 50vh;
     background: #000;
@@ -26,5 +30,10 @@
     top: 0;
     left: 0;
     z-index: 9999;
+  }
+  
+  /* Скрываем основное содержимое на мобильных */
+  #root {
+    display: none !important;
   }
 }
