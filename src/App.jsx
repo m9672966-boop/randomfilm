@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import ConfettiAnimation from './components/ConfettiAnimation';
-import { getMovies, saveMovies, getRandomMovie } from './utils';
+import { getMovies, saveMovies, getRandomMovie, deleteMovie, resetUsedMovies } from './utils';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,19 +54,30 @@ const App = () => {
     if (!currentMovie) setCurrentMovie(newMovie);
   };
 
+  const handleDelete = (id) => {
+    deleteMovie(id);
+    const updated = movies.filter(m => m.id !== id);
+    setMovies(updated);
+    // Если удалили текущий фильм — сгенерировать новый
+    if (currentMovie && currentMovie.id === id) {
+      setCurrentMovie(getRandomMovie());
+    }
+  };
+
   if (!isLoggedIn) return <Login onLogin={handleLogin} />;
 
   if (showAnimation) return <ConfettiAnimation onComplete={onAnimationComplete} />;
 
+  // Создаём удвоенный массив для бесконечной ленты
+  const duplicatedMovies = [...movies, ...movies];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <header className="flex justify-between items-center mb-8 pt-4">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            🎬 Случайный фильм
-          </h1>
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
           <button
             onClick={() => setIsLoggedIn(false)}
             className="text-sm text-gray-400 hover:text-white transition"
@@ -75,97 +86,119 @@ const App = () => {
           </button>
         </header>
 
-        {/* Main Card — centered after animation */}
-        {currentMovie && (
-          <div className={`bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 text-center transform transition-all duration-500 ${showAnimation ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
-            <h2 className="text-2xl font-bold mb-2">{currentMovie.title}</h2>
-
-            {/* Cover Image — smaller size */}
+        {/* Main Card */}
+        {currentMovie ? (
+          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
             {currentMovie.cover ? (
               <img
                 src={currentMovie.cover}
                 alt={currentMovie.title}
-                className="mx-auto rounded-lg my-4 max-h-64 object-cover border-2 border-gray-700 shadow-md w-[200px] h-[300px]"
+                className="mx-auto rounded-lg my-4 w-[200px] h-[300px] object-cover border-2 border-gray-700 shadow-md"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
-                  e.target.alt = 'Изображение недоступно';
                 }}
               />
             ) : (
-              <div className="mx-auto w-48 h-64 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
+              <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
                 🎞️ Без обложки
               </div>
             )}
-
             <p className="text-gray-300 mb-2">
               {currentMovie.year && <span>Год: {currentMovie.year} • </span>}
-              {currentMovie.genre && <span>Жанр: {currentMovie.genre} • </span>}
+              {currentMovie.genre && <span>Жанр: {currentMovie.genre}</span>}
             </p>
-
             {currentMovie.reason && (
               <p className="italic text-gray-400 mt-2">«{currentMovie.reason}»</p>
             )}
-
             <div className="mt-6 flex justify-center gap-4">
               <button
                 onClick={generateMovie}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full transition text-sm font-medium"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full transition font-medium"
               >
                 Сгенерировать снова
               </button>
               <button
                 onClick={markAsWatched}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-full transition text-sm font-medium"
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-full transition font-medium"
               >
                 Уже посмотрели ✅
               </button>
             </div>
           </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-400">Нет фильмов в списке!</p>
+          </div>
         )}
 
-        {/* Marquee with all movies — floating right */}
-        <div className="mb-8 overflow-hidden">
+        {/* Marquee — 2 строки */}
+        <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
-          <div className="flex space-x-4 animate-marquee">
-            {movies.map((movie) => (
-              <div
-                key={movie.id}
-                className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md border-2 ${
-                  movie.watched ? 'border-gray-600 opacity-70' : 'border-gray-700'
-                }`}
-              >
-                {movie.cover ? (
-                  <img
-                    src={movie.cover}
-                    alt={movie.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
-                      e.target.alt = 'Изображение недоступно';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-400">
-                    🎞️
-                  </div>
-                )}
-                <div className="p-2 bg-gray-800 text-xs truncate">
-                  {movie.title}
-                </div>
-              </div>
-            ))}
+
+          {/* Ряд 1 */}
+          <div className="overflow-hidden mb-4 h-[340px]">
+            <div className="flex space-x-6 animate-marquee-row1">
+              {duplicatedMovies.map((movie) => (
+                <MovieItem key={`row1-${movie.id}`} movie={movie} onDelete={handleDelete} />
+              ))}
+            </div>
+          </div>
+
+          {/* Ряд 2 */}
+          <div className="overflow-hidden h-[340px]">
+            <div className="flex space-x-6 animate-marquee-row2">
+              {duplicatedMovies.map((movie) => (
+                <MovieItem key={`row2-${movie.id}`} movie={movie} onDelete={handleDelete} />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Add Movie Form */}
         <MovieForm onAdd={addMovie} />
-
       </div>
     </div>
   );
 };
 
-// Форма добавления фильма — оставим как есть, но можно стилизовать дополнительно
+// Компонент карточки фильма с кнопкой удаления
+const MovieItem = ({ movie, onDelete }) => {
+  return (
+    <div className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md relative group ${
+      movie.watched ? 'opacity-60' : ''
+    }`}>
+      {movie.cover ? (
+        <img
+          src={movie.cover}
+          alt={movie.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+          }}
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-400">
+          🎞️
+        </div>
+      )}
+      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-2 text-xs truncate">
+        {movie.title}
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(movie.id);
+        }}
+        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+        title="Удалить фильм"
+      >
+        ✕
+      </button>
+    </div>
+  );
+};
+
+// Форма добавления
 const MovieForm = ({ onAdd }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -176,10 +209,7 @@ const MovieForm = ({ onAdd }) => {
     reason: '',
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
@@ -189,78 +219,23 @@ const MovieForm = ({ onAdd }) => {
   };
 
   return (
-    <div className="mt-8">
+    <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full transition text-sm font-medium"
+        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full transition font-medium"
       >
         {isOpen ? 'Отмена' : 'Добавить фильм'}
       </button>
 
       {isOpen && (
-        <form onSubmit={handleSubmit} className="mt-4 p-6 bg-gray-800 rounded-xl shadow-md">
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Название фильма *</label>
-            <input
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Название фильма *"
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">URL обложки (опционально)</label>
-            <input
-              name="cover"
-              value={formData.cover}
-              onChange={handleChange}
-              placeholder="https://example.com/poster.jpg"
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Жанр</label>
-            <input
-              name="genre"
-              value={formData.genre}
-              onChange={handleChange}
-              placeholder="Драма, Комедия, Боевик..."
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Год</label>
-            <input
-              name="year"
-              value={formData.year}
-              onChange={handleChange}
-              placeholder="2024"
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Почему рекомендуете?</label>
-            <textarea
-              name="reason"
-              value={formData.reason}
-              onChange={handleChange}
-              placeholder="Опишите, почему стоит посмотреть этот фильм..."
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="3"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-full transition font-medium"
-          >
-            Добавить фильм
+        <form onSubmit={handleSubmit} className="mt-4 p-6 bg-gray-800 rounded-xl shadow-md max-w-2xl">
+          <input name="title" value={formData.title} onChange={handleChange} placeholder="Название *" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" required />
+          <input name="cover" value={formData.cover} onChange={handleChange} placeholder="URL обложки" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
+          <input name="genre" value={formData.genre} onChange={handleChange} placeholder="Жанр" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
+          <input name="year" value={formData.year} onChange={handleChange} placeholder="Год" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
+          <textarea name="reason" value={formData.reason} onChange={handleChange} placeholder="Почему рекомендуете?" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" rows="2" />
+          <button type="submit" className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-full transition font-medium">
+            Добавить
           </button>
         </form>
       )}
