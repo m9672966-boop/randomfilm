@@ -14,4 +14,12 @@
   animation: marquee 40s linear infinite;
 }
 
-/* УДАЛЕНО ВСЕ, что связано с мобильными устройствами */
+/* Убедимся, что Tailwind стили применяются */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+}
