@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import ConfettiAnimation from './components/ConfettiAnimation';
-import { getMovies, saveMovies, getRandomMovie, deleteMovie, resetUsedMovies } from './utils';
+import { getMovies, saveMovies, getRandomMovie, deleteMovie } from './utils';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -58,7 +58,6 @@ const App = () => {
     deleteMovie(id);
     const updated = movies.filter(m => m.id !== id);
     setMovies(updated);
-    // Если удалили текущий фильм — сгенерировать новый
     if (currentMovie && currentMovie.id === id) {
       setCurrentMovie(getRandomMovie());
     }
@@ -68,33 +67,33 @@ const App = () => {
 
   if (showAnimation) return <ConfettiAnimation onComplete={onAnimationComplete} />;
 
-  // Создаём удвоенный массив для бесконечной ленты
+  // Дублируем для бесконечной ленты
   const duplicatedMovies = [...movies, ...movies];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
       <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">🎬 Случайный фильм</h1>
           <button
             onClick={() => setIsLoggedIn(false)}
-            className="text-sm text-gray-400 hover:text-white transition"
+            className="text-sm text-gray-400 hover:text-white"
           >
             Выйти
           </button>
         </header>
 
-        {/* Main Card */}
+        {/* Основная карточка */}
         {currentMovie ? (
           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-10 text-center max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-3">{currentMovie.title}</h2>
+
             {currentMovie.cover ? (
               <img
                 src={currentMovie.cover}
                 alt={currentMovie.title}
-                className="mx-auto rounded-lg my-4 w-[200px] h-[300px] object-cover border-2 border-gray-700 shadow-md"
+                className="mx-auto rounded-lg my-4 w-[200px] h-[300px] object-cover border-2 border-gray-700"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
                 }}
@@ -104,13 +103,29 @@ const App = () => {
                 🎞️ Без обложки
               </div>
             )}
+
             <p className="text-gray-300 mb-2">
               {currentMovie.year && <span>Год: {currentMovie.year} • </span>}
               {currentMovie.genre && <span>Жанр: {currentMovie.genre}</span>}
             </p>
+
             {currentMovie.reason && (
               <p className="italic text-gray-400 mt-2">«{currentMovie.reason}»</p>
             )}
+
+            {currentMovie.link && (
+              <p className="mt-2">
+                <a
+                  href={currentMovie.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  🔗 Посмотреть фильм
+                </a>
+              </p>
+            )}
+
             <div className="mt-6 flex justify-center gap-4">
               <button
                 onClick={generateMovie}
@@ -132,24 +147,13 @@ const App = () => {
           </div>
         )}
 
-        {/* Marquee — 2 строки */}
+        {/* Бегущая строка — одна лента */}
         <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
-
-          {/* Ряд 1 */}
-          <div className="overflow-hidden mb-4 h-[340px]">
-            <div className="flex space-x-6 animate-marquee-row1">
-              {duplicatedMovies.map((movie) => (
-                <MovieItem key={`row1-${movie.id}`} movie={movie} onDelete={handleDelete} />
-              ))}
-            </div>
-          </div>
-
-          {/* Ряд 2 */}
           <div className="overflow-hidden h-[340px]">
-            <div className="flex space-x-6 animate-marquee-row2">
+            <div className="flex space-x-6 animate-marquee">
               {duplicatedMovies.map((movie) => (
-                <MovieItem key={`row2-${movie.id}`} movie={movie} onDelete={handleDelete} />
+                <MovieItem key={movie.id} movie={movie} onDelete={handleDelete} />
               ))}
             </div>
           </div>
@@ -161,7 +165,7 @@ const App = () => {
   );
 };
 
-// Компонент карточки фильма с кнопкой удаления
+// Карточка фильма в ленте
 const MovieItem = ({ movie, onDelete }) => {
   return (
     <div className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md relative group ${
@@ -207,6 +211,7 @@ const MovieForm = ({ onAdd }) => {
     genre: '',
     year: '',
     reason: '',
+    link: '', // ← новое поле
   });
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -214,7 +219,7 @@ const MovieForm = ({ onAdd }) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
     onAdd(formData);
-    setFormData({ title: '', cover: '', genre: '', year: '', reason: '' });
+    setFormData({ title: '', cover: '', genre: '', year: '', reason: '', link: '' });
     setIsOpen(false);
   };
 
@@ -233,6 +238,7 @@ const MovieForm = ({ onAdd }) => {
           <input name="cover" value={formData.cover} onChange={handleChange} placeholder="URL обложки" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
           <input name="genre" value={formData.genre} onChange={handleChange} placeholder="Жанр" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
           <input name="year" value={formData.year} onChange={handleChange} placeholder="Год" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
+          <input name="link" value={formData.link} onChange={handleChange} placeholder="Ссылка на фильм (опционально)" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" />
           <textarea name="reason" value={formData.reason} onChange={handleChange} placeholder="Почему рекомендуете?" className="w-full p-2 mb-2 rounded bg-gray-700 border border-gray-600" rows="2" />
           <button type="submit" className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-full transition font-medium">
             Добавить
