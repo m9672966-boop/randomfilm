@@ -60,7 +60,8 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
+
         {/* Header */}
         <header className="flex justify-between items-center mb-8 pt-4">
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -74,19 +75,19 @@ const App = () => {
           </button>
         </header>
 
-        {/* Main Card */}
-        {currentMovie ? (
-          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 text-center">
+        {/* Main Card — centered after animation */}
+        {currentMovie && (
+          <div className={`bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 text-center transform transition-all duration-500 ${showAnimation ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
             <h2 className="text-2xl font-bold mb-2">{currentMovie.title}</h2>
 
-            {/* Cover Image with fallback */}
+            {/* Cover Image — smaller size */}
             {currentMovie.cover ? (
               <img
                 src={currentMovie.cover}
                 alt={currentMovie.title}
-                className="mx-auto rounded-lg my-4 max-h-64 object-cover border-2 border-gray-700 shadow-md"
+                className="mx-auto rounded-lg my-4 max-h-64 object-cover border-2 border-gray-700 shadow-md w-[200px] h-[300px]"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/300x450?text=No+Image';
+                  e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
                   e.target.alt = 'Изображение недоступно';
                 }}
               />
@@ -120,21 +121,51 @@ const App = () => {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-gray-400">Нет фильмов в списке!</p>
-            <p className="text-sm mt-2">Добавьте первый фильм ниже.</p>
-          </div>
         )}
+
+        {/* Marquee with all movies — floating right */}
+        <div className="mb-8 overflow-hidden">
+          <h3 className="text-xl font-semibold mb-4">Все фильмы</h3>
+          <div className="flex space-x-4 animate-marquee">
+            {movies.map((movie) => (
+              <div
+                key={movie.id}
+                className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md border-2 ${
+                  movie.watched ? 'border-gray-600 opacity-70' : 'border-gray-700'
+                }`}
+              >
+                {movie.cover ? (
+                  <img
+                    src={movie.cover}
+                    alt={movie.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+                      e.target.alt = 'Изображение недоступно';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-400">
+                    🎞️
+                  </div>
+                )}
+                <div className="p-2 bg-gray-800 text-xs truncate">
+                  {movie.title}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Add Movie Form */}
         <MovieForm onAdd={addMovie} />
+
       </div>
     </div>
   );
 };
 
-// Форма добавления фильма — теперь с красивыми полями
+// Форма добавления фильма — оставим как есть, но можно стилизовать дополнительно
 const MovieForm = ({ onAdd }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
