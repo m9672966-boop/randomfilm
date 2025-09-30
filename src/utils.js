@@ -21,10 +21,11 @@ export const getRandomMovie = () => {
   const available = movies.filter(m => !usedMovieIds.has(m.id));
 
   if (available.length === 0) {
-    // Все фильмы использованы — сброс
-    usedMovieIds.clear();
-    return getRandomMovie();
-  }
+  usedMovieIds.clear();
+  const allAvailable = movies.filter(m => !m.watched);
+  if (allAvailable.length === 0) return null;
+  return allAvailable[Math.floor(Math.random() * allAvailable.length)];
+}
 
   const randomMovie = available[Math.floor(Math.random() * available.length)];
   usedMovieIds.add(randomMovie.id);
