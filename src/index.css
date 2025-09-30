@@ -1,18 +1,30 @@
 /* Бесконечная бегущая строка — одна лента */
 @keyframes marquee {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); } /* Двигаем на всю ширину контейнера */
+  100% { transform: translateX(-50%); } /* -50% потому что дублировали массив */
 }
 
 .animate-marquee {
   display: flex;
-  width: max-content; /* Чтобы контейнер был шире экрана */
+  width: max-content;
   animation: marquee 40s linear infinite;
 }
 
-/* Для мобильных устройств — замедляем анимацию */
-@media (max-width: 768px) {
-  .animate-marquee {
-    animation-duration: 60s;
+/* Только для ПК */
+@media (max-width: 1024px) {
+  body::before {
+    content: "Доступно только на компьютере";
+    display: block;
+    text-align: center;
+    font-size: 2rem;
+    color: white;
+    padding-top: 50vh;
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
   }
 }
