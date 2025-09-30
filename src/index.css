@@ -14,26 +14,5 @@
   animation: marquee 40s linear infinite;
 }
 
-/* Только для мобильных устройств */
-@media (max-width: 768px) {
-  body::before {
-    content: "Доступно только на компьютере";
-    display: block;
-    text-align: center;
-    font-size: 1.5rem;
-    color: white;
-    padding-top: 50vh;
-    background: #000;
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 9999;
-  }
-  
-  /* Скрываем основное содержимое на мобильных */
-  #root {
-    display: none !important;
-  }
-}
+/* УБИРАЕМ весь медиа-запрос для мобильных - он мешает */
+/* Оставляем только анимацию бегущей строки */
