@@ -1,0 +1,43 @@
+// Карточка фильма в ленте
+const MovieItem = ({ movie, onDelete }) => {
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (typeof onDelete === 'function') {
+      console.log('Deleting movie:', movie.id);
+      onDelete(movie.id);
+    } else {
+      console.error('onDelete is not a function');
+    }
+  };
+
+  return (
+    <div className={`flex-shrink-0 w-[200px] h-[300px] rounded-lg overflow-hidden shadow-md relative group ${
+      movie.watched ? 'opacity-60' : ''
+    }`}>
+      {movie.cover ? (
+        <img
+          src={movie.cover}
+          alt={movie.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+          }}
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-400">
+          🎞️
+        </div>
+      )}
+      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-2 text-xs truncate">
+        {movie.title}
+      </div>
+      <button
+        onClick={handleDeleteClick}
+        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+        title="Удалить фильм"
+      >
+        ✕
+      </button>
+    </div>
+  );
+};
