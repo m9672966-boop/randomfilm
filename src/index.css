@@ -1,32 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/* Бегущая строка — плавное движение вправо */
+/* Бесконечная бегущая строка — 2 ряда с разной скоростью */
 @keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* 50% потому что дублировано */
 }
 
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 30s linear infinite;
-  /* Повторяем элементы, чтобы создать бесконечную ленту */
-  &::after {
-    content: '';
-    display: block;
-    width: 100%;
-    margin-left: 1rem;
-  }
+.animate-marquee-row1 {
+  animation: marquee 40s linear infinite;
 }
 
-/* Для мобильных устройств — замедляем анимацию */
+.animate-marquee-row2 {
+  animation: marquee 50s linear infinite reverse; /* в обратную сторону и медленнее */
+}
+
+/* Только для ПК — убираем мобильные адаптации */
 @media (max-width: 768px) {
-  .animate-marquee {
-    animation-duration: 60s;
+  body {
+    display: none;
   }
+  /* Или покажем сообщение: */
+  /* body::before {
+    content: "Только для компьютера";
+    display: block;
+    text-align: center;
+    font-size: 2rem;
+    color: white;
+    padding-top: 50vh;
+  } */
 }
