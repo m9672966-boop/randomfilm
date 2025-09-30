@@ -209,10 +209,11 @@ const App = () => {
                   e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
                 }}
               />
-            ) else (
-              <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
-                🎞️ Без обложки
-              </div>
+) : (
+  <div className="mx-auto w-[200px] h-[300px] bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
+    🎞️ Без обложки
+  </div>
+)}
             )}
             <p className="text-gray-300 mb-2">
               {currentMovie.year && <span>Год: {currentMovie.year} • </span>}
